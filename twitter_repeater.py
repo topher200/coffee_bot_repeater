@@ -2,15 +2,22 @@ from __future__ import division
 import base64
 import json
 import logging
+import os
 import redis
 import time
 import urllib
 import urllib2
 
+REDIS_HOST = os.environ['REDIS_HOST']
+REDIS_PORT = int(os.environ['REDIS_PORT'])
+REDIS_PASS = os.environ['REDIS_PASS']
+SUPERTWEET_USER = os.environ['SUPERTWEET_USER']
+SUPERTWEET_PASS = os.environ['SUPERTWEET_PASS']
+
 ###### DB functions
 def get_database():
-  return redis.StrictRedis(host='carp.redistogo.com', port=9489,
-                           password='815cd5fada905eebb5122b347dec091a')
+  return redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT,
+                           password=REDIS_PASS)
 
 def get_last_handled_tweet_id():
   return get_database().get('last_tweet_id')
@@ -41,8 +48,8 @@ def send_dm(user, message):
   logging.info('sending tweet to user: %s', user)
   req = urllib2.Request('http://api.supertweet.net/1/direct_messages/new.json')
   req.add_data(urllib.urlencode({'user': user, 'text': message}))
-  auth = 'Basic ' + base64.urlsafe_b64encode('%s:%s' % ('FSCoffeeBot',
-                                                        'supertweetisawesome'))
+  auth = 'Basic ' + base64.urlsafe_b64encode('%s:%s' % (SUPERTWEET_USER,
+                                                        SUPERTWEET_PASS))
   req.add_header('Authorization', auth)
   try:
     response = urllib2.urlopen(req)
