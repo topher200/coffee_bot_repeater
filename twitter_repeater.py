@@ -1,0 +1,87 @@
+import base64
+import json
+import logging
+import redis
+import time
+import urllib
+import urllib2
+
+###### DB functions
+def get_database():
+  return redis.StrictRedis(host='carp.redistogo.com', port=9489,
+                           password='815cd5fada905eebb5122b347dec091a')
+
+def get_last_handled_tweet_id():
+  return get_database().get('last_tweet_id')
+
+def set_last_handled_tweet_id(id_number):
+  get_database().set('last_tweet_id', id_number)
+
+def get_followers():
+  # TODO
+  return ['topher200']
+###### DB functions
+
+###### Twitter functions
+def get_latest_tweet():
+  '''Returns the latest tweet in JSON form.
+
+  In case of urllib2 error, returns None.'''
+  r = urllib2.Request(("https://api.twitter.com/1/statuses/user_timeline.json" \
+                         "?screen_name=fscoffeebot&count=1"))
+  try:
+    tweets = json.load(urllib2.urlopen(r))
+  except urllib2.URLError, e:
+    logging.warn('urllib error: %s', e)
+    return None
+  return tweets[0]
+
+def send_dm(user, message):
+  logging.info('sending tweet to user: %s', user)
+  req = urllib2.Request('http://api.supertweet.net/1/direct_messages/new.json')
+  req.add_data(urllib.urlencode({'user': user, 'text': message}))
+  auth = 'Basic ' + base64.urlsafe_b64encode('%s:%s' % ('FSCoffeeBot',
+                                                        'supertweetisawesome'))
+  req.add_header('Authorization', auth)
+  try:
+    response = urllib2.urlopen(req)
+  except urllib2.HTTPError, e:
+    logging.error('urllib2 error')
+    logging.error(e.read())
+    return False
+  return int(response.getcode()) == 200
+###### Twitter functions
+
+def run():
+  logging.debug('entering run()')
+  # Get the latest tweet from @FSCoffeeBot
+  tweet = get_latest_tweet()
+  if not tweet:
+    logging.warning('no tweet found')
+    return False
+
+  last_tweet_id = int(get_last_handled_tweet_id())
+  this_tweet_id = int(tweet['id'])
+  if not last_tweet_id:
+    # We haven't init-ed the DB yet - this must be the first run
+    logging.info('No last_tweet_id found. Setting it.')
+    set_last_handled_tweet_id(this_tweet_id)
+    return False
+
+  if last_tweet_id >= this_tweet_id:
+    logging.debug('We already processed this tweet')
+    return False
+    
+  # If we've made it here, it must be a new tweet
+  tweet_text = tweet['text']
+  logging.info('New tweet found: %s', tweet_text)
+  for user in get_followers():
+    print send_dm(user, tweet_text)
+    
+  set_last_handled_tweet_id(this_tweet_id)
+
+if __name__ == '__main__':
+  logging.basicConfig(level=logging.DEBUG)
+  while True:
+    run()
+    time.sleep(30)
