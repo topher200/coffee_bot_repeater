@@ -1,3 +1,4 @@
+from __future__ import division
 import base64
 import json
 import logging
@@ -62,6 +63,7 @@ def run():
 
   last_tweet_id = int(get_last_handled_tweet_id())
   this_tweet_id = int(tweet['id'])
+  logging.debug('found tweet. tweet id: %s' % this_tweet_id)
   if not last_tweet_id:
     # We haven't init-ed the DB yet - this must be the first run
     logging.info('No last_tweet_id found. Setting it.')
@@ -76,7 +78,19 @@ def run():
   tweet_text = tweet['text']
   logging.info('New tweet found: %s', tweet_text)
   for user in get_followers():
-    print send_dm(user, tweet_text)
+    success = False
+    try_number = 0
+    while (not success) and try_number < 5:
+      res = send_dm(user, tweet_text)
+      if res:
+        logging.info('Tweet to %s sent successfully' % user)
+        success = True
+      else:
+        logging.warn('Tweet to %s failed. Try #%s' % (user, try_number))
+        try_number += 1
+        time.sleep(2**try_number/10)
+    if not success:
+      logging.error('Failed to send tweet to %s. Giving up' % user)
     
   set_last_handled_tweet_id(this_tweet_id)
 
