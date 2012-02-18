@@ -26,8 +26,7 @@ def set_last_handled_tweet_id(id_number):
   get_database().set('last_tweet_id', id_number)
 
 def get_followers():
-  # TODO
-  return ['topher200']
+  return get_database().smembers('followers')
 ###### DB functions
 
 ###### Twitter functions
