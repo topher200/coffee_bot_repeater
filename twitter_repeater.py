@@ -44,7 +44,7 @@ def get_latest_tweet():
   return tweets[0]
 
 def send_dm(user, message):
-  logging.info('sending tweet to user: %s', user)
+  logging.info('sending DM to user: %s', user)
   req = urllib2.Request('http://api.supertweet.net/1/direct_messages/new.json')
   req.add_data(urllib.urlencode({'user': user, 'text': message}))
   auth = 'Basic ' + base64.urlsafe_b64encode('%s:%s' % (SUPERTWEET_USER,
