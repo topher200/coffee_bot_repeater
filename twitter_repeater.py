@@ -105,4 +105,5 @@ if __name__ == '__main__':
   logging.basicConfig(level=logging.DEBUG)
   while True:
     run()
-    time.sleep(30)
+    for _ in range(30):
+      time.sleep(1)
