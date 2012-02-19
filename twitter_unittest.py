@@ -10,7 +10,7 @@ class TwitterTester(unittest.TestCase):
   def test_send_dm(self):
     user = 'topher200'
     message = 'unittest message. '
-    # Adding some random characters to twitter doesn't complain about
+    # Adding some random characters so twitter doesn't complain about
     # duplicate messages
     for _ in range(5):
       message += random.choice(string.ascii_lowercase + string.digits)
