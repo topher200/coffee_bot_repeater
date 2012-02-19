@@ -30,18 +30,9 @@ def run():
   tweet_text = tweet['text']
   logging.info('New tweet found: %s', tweet_text)
   for user in database.get_followers():
-    success = False
-    try_number = 0
-    while (not success) and try_number < 5:
-      res = twitter.send_dm(user, tweet_text)
-      if res:
-        logging.info('Tweet to %s sent successfully' % user)
-        success = True
-      else:
-        logging.warn('Tweet to %s failed. Try #%s' % (user, try_number))
-        try_number += 1
-        time.sleep(2**try_number/10)
-    if not success:
+    if twitter.send_dm(user, tweet_text):
+      logging.info('Tweet to %s sent successfully' % user)
+    else:
       logging.error('Failed to send tweet to %s. Giving up' % user)
     
   database.set_last_handled_tweet_id(this_tweet_id)
