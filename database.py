@@ -32,7 +32,11 @@ def get_followers():
   return _get_database().smembers('followers')
 
 def pop_message_to_send():
-  return pickle.loads(_get_database().lpop('message_to_send'))
+  message_to_send = _get_database().lpop('message_to_send')
+  if message_to_send:
+    return pickle.loads(message_to_send)
+  else:
+    return None
 
 def push_message_to_send(message_to_send):
   _get_database().rpush('message_to_send', pickle.dumps(message_to_send))
