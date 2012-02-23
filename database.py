@@ -1,7 +1,6 @@
 from __future__ import division
 from time import time
 import pickle
-import re
 import redis
 
 import environment
