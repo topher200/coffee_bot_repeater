@@ -41,7 +41,7 @@ def do_deferred_job():
     return False
   
   # If it's been more then 5 minutes, throw away the job
-  if time() + (5 * 60) > message_to_send.time:
+  if time() > message_to_send.time + (5 * 60):
     logging.error(
       "Timing out DM to %s. dm.time: %s, current time: %s. Message: %s" \
         % (message_to_send.user, message_to_send.time, time(),
