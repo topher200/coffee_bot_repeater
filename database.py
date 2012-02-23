@@ -2,9 +2,11 @@ from __future__ import division
 import os
 import redis
 
-REDIS_HOST = os.environ['REDIS_HOST']
-REDIS_PORT = int(os.environ['REDIS_PORT'])
-REDIS_PASS = os.environ['REDIS_PASS']
+import environment
+
+REDIS_HOST = environment.get_config('REDIS_HOST')
+REDIS_PORT = int(environment.get_config('REDIS_PORT'))
+REDIS_PASS = environment.get_config('REDIS_PASS')
 
 def _get_database():
   return redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT,

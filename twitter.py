@@ -5,8 +5,10 @@ import os
 import urllib
 import urllib2
 
-SUPERTWEET_USER = os.environ['SUPERTWEET_USER']
-SUPERTWEET_PASS = os.environ['SUPERTWEET_PASS']
+import environment
+
+SUPERTWEET_USER = environment.get_config('SUPERTWEET_USER')
+SUPERTWEET_PASS = environment.get_config('SUPERTWEET_PASS')
 
 def _try_function_multiple_times(func):
   result = None
