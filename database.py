@@ -38,9 +38,10 @@ def get_followers():
   return _get_database().smembers('followers')
 
 def pop_message_to_send():
-  return MessageToSend.parse_from_string(_get_database().lpop())
+  return MessageToSend.parse_from_string(_get_database().lpop(
+      'message_to_send'))
 
 def push_message_to_send(message_to_send):
-  _get_database().rpush(message_to_send.to_string())
+  _get_database().rpush('message_to_send', message_to_send.to_string())
   
   
