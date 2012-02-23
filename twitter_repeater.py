@@ -60,6 +60,8 @@ if __name__ == '__main__':
   logging.basicConfig(level=logging.DEBUG)
   while True:
     run()
-    for _ in range(30):
+    run_time = time()
+    # Process jobs for 30 seconds
+    while time() < run_time + 30:
       do_deferred_job()
-      sleep(1)
+      sleep(.1)
