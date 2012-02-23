@@ -1,6 +1,6 @@
 from __future__ import division
+from time import sleep, time
 import logging
-import time
 
 import database
 import twitter
@@ -30,16 +30,36 @@ def run():
   tweet_text = tweet['text']
   logging.info('New tweet found: %s', tweet_text)
   for user in database.get_followers():
-    if twitter.send_dm(user, tweet_text):
-      logging.info('Tweet to %s sent successfully' % user)
-    else:
-      logging.error('Failed to send tweet to %s. Giving up' % user)
+    database.push_message_to_send(database.MessageToSend(user, tweet_text))
     
   database.set_last_handled_tweet_id(this_tweet_id)
+
+def do_deferred_job():
+  '''Attempts to run a job in the queue. Returns True if a job is found.'''
+  message_to_send = database.pop_message_to_send()
+  if not message_to_send:
+    return False
+  
+  # If it's been more then 5 minutes, throw away the job
+  if time() + (5 * 60) > message_to_send.time:
+    logging.error(
+      "Timing out DM to %s. dm.time: %s, current time: %s. Message: %s" \
+        % (message_to_send.user, message_to_send.time, time(),
+           message_to_send.message))
+    return True
+      
+  # Job is still valid. Run it!
+  if twitter.send_dm(message_to_send.user, message_to_send.tweet_text):
+    logging.info('sent DM to user: %s' % message_to_send.user)
+  else:
+    logging.warn('DM to user %s failed' % message_to_send.user)
+    # We couldn't finish the job - push it back into the queue
+    database.push_message_to_send(message_to_send)
 
 if __name__ == '__main__':
   logging.basicConfig(level=logging.DEBUG)
   while True:
     run()
     for _ in range(30):
-      time.sleep(1)
+      do_deferred_job()
+      sleep(1)
