@@ -49,7 +49,7 @@ def do_deferred_job():
     return True
       
   # Job is still valid. Run it!
-  if twitter.send_dm(message_to_send.user, message_to_send.tweet_text):
+  if twitter.send_dm(message_to_send.user, message_to_send.message):
     logging.info('sent DM to user: %s' % message_to_send.user)
   else:
     logging.warn('DM to user %s failed' % message_to_send.user)
