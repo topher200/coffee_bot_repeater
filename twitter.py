@@ -1,7 +1,7 @@
+from time import sleep
 import base64
 import json
 import logging
-import os
 import urllib
 import urllib2
 
@@ -22,7 +22,7 @@ def _try_function_multiple_times(func):
       logging.info('Dangerous function try #%s failed. error: %s' %
                    (try_number, e))
       try_number += 1
-      time.sleep(2**try_number/10)
+      sleep(2**try_number/10)
   if not success:
     logging.warning('Dangerous function failed permanently')
     return False
